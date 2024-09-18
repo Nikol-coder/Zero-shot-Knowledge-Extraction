@@ -1,0 +1,3 @@
+deepseek_rag.py 为 使用rag做增强的代码
+
+auto_search_baidu, search_baidu.py 和 baike.py 为爬取百度文库，做本地知识库的代码

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检索增强搜索工具</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005ba1;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .images-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .images-container img {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="Baidu Logo" class="logo">
+        <h1>检索增强搜索工具</h1>
+        <input type="text" id="search_term" placeholder="请输入搜索词">
+        <button onclick="search()">搜索</button>
+        <div id="result"></div>
+        <div class="images-container" id="images-container"></div>
+        <button id="more-info" style="margin-top: 20px;" onclick="viewMoreInfo()">更多资料</button>
+    </div>
+
+    <script>
+        let baikeUrl = '';
+
+        function search() {
+            const searchTerm = document.getElementById('search_term').value;
+            if (searchTerm) {
+                fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `search_term=${encodeURIComponent(searchTerm)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const resultDiv = document.getElementById('result');
+                        resultDiv.innerHTML = '';
+                        for (const key in data.data['百度百科'][searchTerm]) {
+                            if (key !== 'url' && key !== 'images') {
+                                const p = document.createElement('p');
+                                p.textContent = `${key}: ${data.data['百度百科'][searchTerm][key]}`;
+                                resultDiv.appendChild(p);
+                            } else if (key === 'url') {
+                                baikeUrl = data.data['百度百科'][searchTerm][key];
+                            } else if (key === 'images') {
+                                const imagesContainer = document.getElementById('images-container');
+                                imagesContainer.innerHTML = '';
+                                data.data['百度百科'][searchTerm][key].forEach(imgUrl => {
+                                    const img = document.createElement('img');
+                                    img.src = imgUrl;
+                                    imagesContainer.appendChild(img);
+                                });
+                            }
+                        }
+                    } else {
+                        document.getElementById('result').innerHTML = data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = '搜索过程中发生错误';
+                });
+            } else {
+                document.getElementById('result').innerHTML = '请输入搜索词';
+            }
+        }
+
+        function viewMoreInfo() {
+            if (baikeUrl) {
+                window.open(baikeUrl, '_blank');
+            } else {
+                alert('请先进行搜索以获取更多资料的链接。');
+            }
+        }
+    </script>
+</body>
+</html>

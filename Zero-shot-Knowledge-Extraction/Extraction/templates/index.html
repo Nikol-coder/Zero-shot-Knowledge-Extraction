@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识抽取工具</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 800px;
+            width: 100%;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 24px;
+            background-color: #0078d7;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005ba1;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        a {
+            color: #0078d7;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #schema {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+            text-align: left;
+        }
+        #schema table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #schema th, #schema td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #schema th {
+            background-color: #f2f2f2;
+        }
+        #knowledge-result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+        #knowledge-result table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        #knowledge-result th, #knowledge-result td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #knowledge-result th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png" alt="Baidu Logo" class="logo">
+        <h1>知识抽取工具</h1>
+        <div id="schema">
+            <h2>Schema</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Entity Type</th>
+                        <th>Attributes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>文化人物</td>
+                        <td>
+                            <ul>
+                                <li><strong>主要成就</strong>: 特定领域或领域内的成就。</li>
+                                <li><strong>出生地</strong>: 人物出生的具体地点。</li>
+                                <li><strong>毕业院校</strong>: 完成学业后获得学位的学校。</li>
+                                <li><strong>职业</strong>: 服务社会并作为主要生活来源的工作。</li>
+                                <li><strong>出生日期</strong>: 指个体在历法上的出生日。</li>
+                                <li><strong>汉族</strong>: 汉族</li>
+                                <li><strong>代表作品</strong>: 最能体现人物思想水平和艺术风格的作品。</li>
+                                <li><strong>民族</strong>: 特定群体的共同文化、传统和身份特征。</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <input type="text" id="input_text" placeholder="请输入文本">
+        <button onclick="extractKnowledge()">抽取知识</button>
+        <div id="knowledge-result"></div>
+    </div>
+
+    <script>
+        function extractKnowledge() {
+            const inputText = document.getElementById('input_text').value;
+            if (inputText) {
+                fetch('/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `input_text=${encodeURIComponent(inputText)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const knowledgeResultDiv = document.getElementById('knowledge-result');
+                        knowledgeResultDiv.innerHTML = '';
+
+                        // 创建表格
+                        const table = document.createElement('table');
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th colspan="2">${Object.keys(data.data)[0]}: ${Object.keys(data.data[Object.keys(data.data)[0]])[0]}</th>
+                                </tr>
+                                <tr>
+                                    <th>Attribute</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        `;
+
+                        // 解析 JSON 数据并填充表格
+                        const entityType = Object.keys(data.data)[0];
+                        const entity = Object.keys(data.data[entityType])[0];
+                        const attributes = data.data[entityType][entity];
+
+                        for (const key in attributes) {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${key}</td>
+                                <td>${Array.isArray(attributes[key]) ? attributes[key].join(', ') : attributes[key]}</td>
+                            `;
+                            table.querySelector('tbody').appendChild(row);
+                        }
+
+                        knowledgeResultDiv.appendChild(table);
+                    } else {
+                        document.getElementById('knowledge-result').innerHTML = data.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('knowledge-result').innerHTML = '知识抽取过程中发生错误';
+                });
+            } else {
+                document.getElementById('knowledge-result').innerHTML = '请输入文本';
+            }
+        }
+    </script>
+</body>
+</html>

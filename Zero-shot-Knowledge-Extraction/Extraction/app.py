@@ -52,7 +52,10 @@ def extract_knowledge(input_text):
             # 获取"instruction"字段的值
             line = data['instruction']
             line = json.loads(line)
-
+            
+            #看是否是csv文件自动化处理
+            # line['input']=input_text
+            
             line['instruction'] = instruction
             last_output = data['output']
             label = list((json.loads(data['label']).values()))[0]

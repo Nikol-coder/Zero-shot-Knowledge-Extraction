@@ -7,7 +7,7 @@ import numpy
 app = Flask(__name__)
 
 # OpenAI 配置
-client = OpenAI(api_key="sk-ea4907f2d1ac4b79856d825f0ca9cc3d", base_url="https://api.deepseek.com")
+client = OpenAI(api_key="换为您自己的api接口", base_url="https://api.deepseek.com")
 numpy.random.seed(42)
 
 # 示例数据

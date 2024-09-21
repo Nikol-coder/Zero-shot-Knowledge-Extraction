@@ -11,6 +11,6 @@ rag代码说明为构造本地知识库的代码
 
 Extration为展示代码
 
-demo_test.json为输入数据格式，可自行调整
+demo_test.json为不使用RAG输入数据格式，demo.json为使用RAG输入数据格式，可自行调整
 
 # 各环节代码均已开源，即插即用，请自取所需
